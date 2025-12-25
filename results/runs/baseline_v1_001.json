@@ -1,0 +1,24 @@
+{
+  "experiment_id": "baseline_v1_001",
+  "date": "2024-12-14",
+  "type": "baseline",
+  "description": "Train on 1K labeled GSM8K, evaluate on test set",
+  "question": "Is 1K labeled examples enough to get a reasonable baseline model?",
+  "config": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "labeled_size": 1000,
+    "train_epochs": 2,
+    "learning_rate": 2e-5,
+    "batch_size": 4,
+    "eval_samples": 100
+  },
+  "results": {
+    "test_accuracy": 0.35,
+    "correct": 35,
+    "total": 100,
+    "train_loss_final": 0.26,
+    "train_runtime_seconds": 165
+  },
+  "interpretation": "35% accuracy is in target range (20-70%). Model learned something but has room for improvement. Good baseline for comparison.",
+  "next_step": "Check pseudo-label quality to see if consensus voting can produce reliable labels"
+}

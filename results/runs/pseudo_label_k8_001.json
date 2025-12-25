@@ -1,0 +1,29 @@
+{
+  "experiment_id": "pseudo_label_k8_001",
+  "date": "2024-12-14",
+  "type": "pseudo_label_check",
+  "description": "Check pseudo-label quality with K=8 samples per prompt using base model",
+  "question": "Does increasing K from 4 to 8 improve pseudo-label accuracy above 50%?",
+  "config": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "K": 8,
+    "sample_size": 100,
+    "temperature": 0.7,
+    "fine_tuned": false
+  },
+  "results": {
+    "coverage": 1.0,
+    "overall_accuracy": 0.52,
+    "high_confidence_accuracy": 1.0,
+    "high_confidence_count": 8,
+    "high_confidence_threshold": 0.75
+  },
+  "comparison": {
+    "k4_accuracy": 0.38,
+    "k8_accuracy": 0.52,
+    "improvement": 0.14
+  },
+  "interpretation": "K=8 improved accuracy from 38% to 52%, crossing our 50% threshold. High-confidence examples remain 100% accurate but are rarer (8 vs 13). The improvement confirms the model CAN be right more often with more samples, but it's borderline.",
+  "decision": "PROCEED with V1 experiment using K=8",
+  "next_step": "Run full V1: baseline vs noisy student vs oracle"
+}

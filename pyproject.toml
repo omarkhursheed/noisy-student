@@ -1,0 +1,53 @@
+[project]
+name = "noisy-student"
+version = "0.1.0"
+description = "Noisy Student Self-Distillation for LLMs - Learning RL through RLVR"
+requires-python = ">=3.10"
+
+dependencies = [
+    # Core ML
+    "torch>=2.0",
+    "transformers>=4.40",
+    "datasets>=2.18",
+    "accelerate>=0.28",
+    # RL for LLMs
+    "trl>=0.8", # HuggingFace's RL library
+    "peft>=0.10", # LoRA and parameter-efficient fine-tuning
+    # Compute platform
+    "modal>=0.62", # Modal for GPU access
+    # Experiment tracking
+    "wandb>=0.16",
+    # Utilities
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+    "numpy>=1.26",
+    "ipykernel>=7.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.3",
+    "ipython>=8.22",
+    "jupyter>=1.0",
+    "matplotlib>=3.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]  # line length handled separately
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"

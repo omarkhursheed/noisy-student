@@ -1,0 +1,23 @@
+{
+  "experiment_id": "pseudo_label_k4_001",
+  "date": "2024-12-14",
+  "type": "pseudo_label_check",
+  "description": "Check pseudo-label quality with K=4 samples per prompt using base model",
+  "question": "Can the base model produce reliable consensus pseudo-labels?",
+  "config": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "K": 4,
+    "sample_size": 100,
+    "temperature": 0.7,
+    "fine_tuned": false
+  },
+  "results": {
+    "coverage": 1.0,
+    "overall_accuracy": 0.38,
+    "high_confidence_accuracy": 1.0,
+    "high_confidence_count": 13,
+    "high_confidence_threshold": 0.75
+  },
+  "interpretation": "38% overall accuracy is below 50% target. However, high-confidence examples (>=75% agreement) are 100% accurate, just rare (13%). This suggests the model CAN be right when confident, but K=4 doesn't produce enough confident examples.",
+  "next_step": "Try K=8 to see if more samples produce more high-confidence examples and better overall accuracy"
+}

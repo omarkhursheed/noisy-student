@@ -1,0 +1,4 @@
+experiment_id,date,type,model,description,key_metric,value,notes
+baseline_v1_001,2024-12-14,baseline,Qwen2.5-0.5B-Instruct,Train on 1K labeled - evaluate on 100 test,test_accuracy,0.35,Target range 20-70% - PASS
+pseudo_label_k4_001,2024-12-14,pseudo_label_check,Qwen2.5-0.5B-Instruct,K=4 consensus on 100 unlabeled (base model),pseudo_label_accuracy,0.38,Below 50% target - need more K or bigger model
+pseudo_label_k4_001,2024-12-14,pseudo_label_check,Qwen2.5-0.5B-Instruct,K=4 high-confidence (>=75%) accuracy,high_conf_accuracy,1.00,Only 13/100 examples hit 75%+ confidence

@@ -1,0 +1,56 @@
+{
+  "experiment_id": "v1_5_001",
+  "date": "2025-12-16",
+  "type": "confidence_filtering",
+  "description": "V1.5: Test if high-confidence pseudo-labels help more than all pseudo-labels",
+  "question": "Does quality > quantity for pseudo-labels?",
+  "config": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "K": 8,
+    "labeled_size": 1000,
+    "unlabeled_size": 4000,
+    "confidence_threshold": 0.75,
+    "eval_samples": 500,
+    "epochs": 2,
+    "learning_rate": 2e-5,
+    "batch_size": 4
+  },
+  "results": {
+    "baseline_acc": 0.28,
+    "filtered_acc": 0.276,
+    "all_pseudo_count": 4000,
+    "all_pseudo_acc": 0.521,
+    "high_conf_count": 981,
+    "high_conf_acc": 0.937,
+    "high_conf_rate": 0.245
+  },
+  "confidence_distribution": {
+    "0.125": 597,
+    "0.25": 936,
+    "0.375": 648,
+    "0.5": 475,
+    "0.625": 363,
+    "0.75": 305,
+    "0.875": 287,
+    "1.0": 389
+  },
+  "comparisons": {
+    "filtered_vs_baseline": "-0.4pp (27.6% vs 28.0%), not significant",
+    "filtered_vs_noisy_student": "+0.8pp (27.6% vs 26.8%), not significant",
+    "high_conf_vs_all_pseudo_acc": "+41.6pp (93.7% vs 52.1%)"
+  },
+  "interpretation": "High-confidence pseudo-labels are much more accurate (93.7% vs 52.1%), but still don't help over baseline. Got 981 high-conf examples (24.5% of 4K) which is more than the ~320 expected from pre-flight. Even with 93.7% accuracy, the filtered model (27.6%) did not beat baseline (28.0%).",
+  "success_criteria_met": false,
+  "primary_finding": "Quality alone is not sufficient - even 93.7% accurate pseudo-labels don't improve over baseline",
+  "hypotheses_for_failure": [
+    "6.3% error rate (62 wrong examples) still contaminates training",
+    "981 examples is not enough additional data to move the needle",
+    "Model may be saturated - can't learn more from similar distribution",
+    "SFT directly fits to answers, including the wrong ones"
+  ],
+  "next_steps": [
+    "V2: Increase K to 16/32 for more high-conf examples at higher accuracy",
+    "V3: Try stronger model (Qwen3-0.6B)",
+    "V4: Try RL instead of SFT"
+  ]
+}

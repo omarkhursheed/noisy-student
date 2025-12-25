@@ -1,0 +1,45 @@
+{
+  "experiment_id": "full_v1_001",
+  "date": "2025-12-15",
+  "type": "full_v1",
+  "description": "Full V1 experiment: 5 conditions comparing baseline, noisy student, and oracle",
+  "question": "Can consensus-based pseudo-labeling expand training data for LLM reasoning?",
+  "config": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "K": 8,
+    "labeled_size": 1000,
+    "unlabeled_size": 4000,
+    "eval_samples": 500,
+    "epochs": 2,
+    "learning_rate": 2e-5,
+    "batch_size": 4,
+    "temperature_generation": 0.7,
+    "temperature_eval": 0.1
+  },
+  "results": {
+    "base_acc": 0.21,
+    "baseline_acc": 0.27,
+    "pseudo_only_acc": 0.236,
+    "noisy_student_acc": 0.268,
+    "oracle_acc": 0.324,
+    "pseudo_label_acc": 0.519,
+    "pseudo_labeled_count": 4000
+  },
+  "comparisons": {
+    "base_to_baseline": "+6.0pp (21% -> 27%), p~0.03, significant",
+    "base_to_pseudo_only": "+2.6pp (21% -> 23.6%)",
+    "baseline_to_noisy_student": "-0.2pp (27% -> 26.8%), p~0.9, not significant",
+    "baseline_to_oracle": "+5.4pp (27% -> 32.4%), p~0.06, marginal",
+    "pseudo_only_to_noisy_student": "+3.2pp (23.6% -> 26.8%)"
+  },
+  "interpretation": "Noisy Student (26.8%) did NOT beat Baseline (27.0%). Oracle (32.4%) shows the model CAN learn more with correct labels. The pseudo-labels at 52% accuracy are too noisy - nearly half teach wrong reasoning. The model has capacity to improve (Oracle proves this), but needs higher quality pseudo-labels.",
+  "success_criteria_met": false,
+  "primary_finding": "52% pseudo-label accuracy is insufficient for positive transfer with SFT",
+  "next_steps": [
+    "Complete Oracle run to confirm more real data helps",
+    "Try confidence filtering (only use >=75% agreement pseudo-labels)",
+    "Increase K to 16 or 32 for better consensus",
+    "Consider Qwen3-0.6B or larger model"
+  ],
+  "notes": "Oracle step timed out and is being re-run separately. Runtime was ~6 hours before timeout."
+}
