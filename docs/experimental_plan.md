@@ -289,21 +289,25 @@ High-confidence pseudo-labels help?
 
 ## Current Status
 
-**V1 + V1.5 COMPLETE, V4 IN PROGRESS**
+**V1 + V1.5 + V4 COMPLETE**
 
 **Combined Results (n=500 per eval, 95% CI ~4.5%):**
 | Condition | Accuracy | Pseudo Acc | Notes |
 |-----------|----------|------------|-------|
 | Base (untrained) | 21.0% | - | Zero-shot |
 | Pseudo-only (4K pseudo) | 23.6% | 52% | Worse than baseline |
-| SFT Baseline (1K labeled) | 27-28% | - | Reference point |
+| SFT Baseline (1K labeled) | 27.0% | - | Reference point |
 | SFT Noisy Student (1K + 4K pseudo) | 26.8% | 52% | = Baseline |
 | SFT Filtered (1K + 981 high-conf) | 27.6% | 93.7% | = Baseline (V1.5) |
-| SFT Oracle (1K + 4K real) | 32.4% | 100% | Upper bound |
+| SFT Oracle (5K real) | 32.4% | 100% | Upper bound |
 | **GRPO Baseline (1K labeled)** | **32.6%** | - | **Matches Oracle!** |
-| GRPO Noisy Student (1K + 4K pseudo) | TBD | ~49% | Running... |
+| **GRPO Noisy Student (1K + 4K pseudo)** | **30.6%** | 46.3% | -2pp from GRPO baseline |
 
-**V4 Key Finding: GRPO on 1K labeled (32.6%) matches SFT on 5K real (32.4%).**
+**V4 Key Findings:**
+1. GRPO on 1K labeled (32.6%) matches SFT on 5K real (32.4%)
+2. GRPO is more robust to label noise: GRPO Noisy Student (30.6%) > SFT Noisy Student (26.8%)
+3. But noisy pseudo-labels still hurt: GRPO Noisy Student (30.6%) < GRPO Baseline (32.6%)
+4. Best strategy: Just use GRPO on clean data - no pseudo-labels needed
 
 **V1.5 Key Finding: Even 93.7% accurate pseudo-labels don't help SFT.**
 
@@ -360,7 +364,7 @@ High-confidence pseudo-labels help?
 | 2025-12-25 | debug_grpo_003 | GRPO debug: temp=0.3, 256 tokens | WORKING | reward_std>0, learning visible |
 | 2025-12-25 | debug_grpo_A2 | GRPO debug: final config (50 steps) | SUCCESS | 25-100% reward, KL increasing |
 | 2025-12-25 | v4_baseline_003 | GRPO baseline (tuned config, A10G) | **32.6%** (+5.6pp over SFT baseline) | GRPO approach working |
-| 2025-12-25 | v4_noisy_003 | GRPO noisy student (tuned config, A10G) | RUNNING | Pseudo-labeling in progress |
+| 2025-12-26 | v4_noisy_003 | GRPO noisy student (tuned config, A10G) | **30.6%** (46.3% pseudo acc) | Noisy labels hurt by 2pp |
 
 ### V1 Full Results Analysis
 
@@ -511,9 +515,9 @@ V4 now uses identical settings to V1 for all data-related parameters:
 1. V4 Baseline similar to V1 Baseline (both ~27%) - confirms RL works
    - **RESULT: V4 Baseline = 32.6%, significantly BETTER than V1 SFT (27%)**
 2. V4 Noisy Student > V1 Noisy Student (26.8%) - RL handles noise better
-   - **PENDING** (run in progress)
+   - **RESULT: YES - 30.6% > 26.8% (+3.8pp)**
 3. Bonus: V4 Noisy Student > V4 Baseline - pseudo-labels actually help with RL
-   - **PENDING**
+   - **RESULT: NO - 30.6% < 32.6% (-2pp). Noisy labels still hurt.**
 
 ### V4 Baseline Results (2025-12-25)
 
@@ -531,6 +535,24 @@ Why GRPO is more sample-efficient:
 - SFT penalizes correct solutions that use different wording/steps
 - GRPO lets the model use its pretrained reasoning and just reinforces what works
 - The model already knows math; GRPO teaches it when/how to apply that knowledge
+
+### V4 Noisy Student Results (2025-12-26)
+
+| Condition | Accuracy | Pseudo Acc | vs GRPO Baseline |
+|-----------|----------|------------|------------------|
+| V1 SFT Noisy Student | 26.8% | 52% | - |
+| **V4 GRPO Noisy Student** | **30.6%** | 46.3% | -2pp |
+| V4 GRPO Baseline | 32.6% | - | reference |
+
+**Key findings:**
+1. GRPO is more robust to label noise than SFT: 30.6% vs 26.8% (+3.8pp)
+2. But noisy pseudo-labels still hurt GRPO: 30.6% vs 32.6% (-2pp)
+3. Lower pseudo-label accuracy (46.3% vs 52%) contributed to worse results
+4. Best strategy: Use GRPO on clean labeled data only
+
+**Conclusion:** The noisy student approach doesn't help when you have GRPO.
+GRPO extracts more signal from clean labeled data than SFT can from 5x more data.
+Adding noisy pseudo-labels dilutes this signal and hurts performance.
 
 ### Configuration (Tuned 2025-12-25)
 ```python
