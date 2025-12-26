@@ -289,19 +289,23 @@ High-confidence pseudo-labels help?
 
 ## Current Status
 
-**V1 + V1.5 COMPLETE**
+**V1 + V1.5 COMPLETE, V4 IN PROGRESS**
 
 **Combined Results (n=500 per eval, 95% CI ~4.5%):**
 | Condition | Accuracy | Pseudo Acc | Notes |
 |-----------|----------|------------|-------|
 | Base (untrained) | 21.0% | - | Zero-shot |
 | Pseudo-only (4K pseudo) | 23.6% | 52% | Worse than baseline |
-| Baseline (1K labeled) | 27-28% | - | Reference point |
-| Noisy Student (1K + 4K pseudo) | 26.8% | 52% | = Baseline |
-| **Filtered (1K + 981 high-conf)** | **27.6%** | **93.7%** | = Baseline (V1.5) |
-| Oracle (1K + 4K real) | 32.4% | 100% | Upper bound |
+| SFT Baseline (1K labeled) | 27-28% | - | Reference point |
+| SFT Noisy Student (1K + 4K pseudo) | 26.8% | 52% | = Baseline |
+| SFT Filtered (1K + 981 high-conf) | 27.6% | 93.7% | = Baseline (V1.5) |
+| SFT Oracle (1K + 4K real) | 32.4% | 100% | Upper bound |
+| **GRPO Baseline (1K labeled)** | **32.6%** | - | **Matches Oracle!** |
+| GRPO Noisy Student (1K + 4K pseudo) | TBD | ~49% | Running... |
 
-**V1.5 Key Finding: Even 93.7% accurate pseudo-labels don't help.**
+**V4 Key Finding: GRPO on 1K labeled (32.6%) matches SFT on 5K real (32.4%).**
+
+**V1.5 Key Finding: Even 93.7% accurate pseudo-labels don't help SFT.**
 
 **Statistical Significance:**
 | Comparison | Diff | p-value | Significant? |
@@ -355,8 +359,8 @@ High-confidence pseudo-labels help?
 | 2025-12-25 | debug_grpo_002 | GRPO debug: temp=0.7, beta=0.04 | Still zero loss, degenerate loops | Need more changes |
 | 2025-12-25 | debug_grpo_003 | GRPO debug: temp=0.3, 256 tokens | WORKING | reward_std>0, learning visible |
 | 2025-12-25 | debug_grpo_A2 | GRPO debug: final config (50 steps) | SUCCESS | 25-100% reward, KL increasing |
-| 2025-12-25 | v4_baseline_003 | GRPO baseline (tuned config, A10G) | RUNNING | |
-| 2025-12-25 | v4_noisy_003 | GRPO noisy student (tuned config, A10G) | RUNNING | |
+| 2025-12-25 | v4_baseline_003 | GRPO baseline (tuned config, A10G) | **32.6%** (+5.6pp over SFT baseline) | GRPO approach working |
+| 2025-12-25 | v4_noisy_003 | GRPO noisy student (tuned config, A10G) | RUNNING | Pseudo-labeling in progress |
 
 ### V1 Full Results Analysis
 
@@ -505,8 +509,28 @@ V4 now uses identical settings to V1 for all data-related parameters:
 
 ### Success Criteria
 1. V4 Baseline similar to V1 Baseline (both ~27%) - confirms RL works
+   - **RESULT: V4 Baseline = 32.6%, significantly BETTER than V1 SFT (27%)**
 2. V4 Noisy Student > V1 Noisy Student (26.8%) - RL handles noise better
+   - **PENDING** (run in progress)
 3. Bonus: V4 Noisy Student > V4 Baseline - pseudo-labels actually help with RL
+   - **PENDING**
+
+### V4 Baseline Results (2025-12-25)
+
+| Condition | Accuracy | vs SFT Baseline |
+|-----------|----------|-----------------|
+| V1 SFT Baseline (1K labeled) | 27.0% | - |
+| V1 SFT Oracle (5K real) | 32.4% | +5.4pp |
+| **V4 GRPO Baseline (1K labeled)** | **32.6%** | **+5.6pp** |
+
+**Key finding: GRPO on 1K labeled matches SFT Oracle (5K real labels).**
+
+Why GRPO is more sample-efficient:
+- SFT learns to reproduce exact solution text (cross-entropy on every token)
+- GRPO only cares if the final answer is correct (binary reward)
+- SFT penalizes correct solutions that use different wording/steps
+- GRPO lets the model use its pretrained reasoning and just reinforces what works
+- The model already knows math; GRPO teaches it when/how to apply that knowledge
 
 ### Configuration (Tuned 2025-12-25)
 ```python
